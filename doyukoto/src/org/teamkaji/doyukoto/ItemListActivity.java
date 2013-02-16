@@ -1,8 +1,19 @@
 package org.teamkaji.doyukoto;
 
+import java.util.Set;
+
+import jp.co.olympus.meg40.BluetoothNotEnabledException;
+import jp.co.olympus.meg40.BluetoothNotFoundException;
+import jp.co.olympus.meg40.Meg;
+import jp.co.olympus.meg40.MegGraphics;
+import jp.co.olympus.meg40.MegListener;
+import jp.co.olympus.meg40.MegStatus;
+import android.bluetooth.BluetoothAdapter;
+import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
+import android.widget.Toast;
 
 /**
  * An activity representing a list of Items. This activity has different
@@ -20,13 +31,17 @@ import android.support.v4.app.FragmentActivity;
  * interface to listen for item selections.
  */
 public class ItemListActivity extends FragmentActivity implements
-		ItemListFragment.Callbacks {
+		ItemListFragment.Callbacks, MegListener {
 
 	/**
 	 * Whether or not the activity is in two-pane mode, i.e. running on a tablet
 	 * device.
 	 */
 	private boolean mTwoPane;
+	
+	private Meg mMeg; //MEGへのコマンド送信を行うインスタンス
+	private MegGraphics mMegGraphics; // グラフィック描画用
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -45,8 +60,55 @@ public class ItemListActivity extends FragmentActivity implements
 			((ItemListFragment) getSupportFragmentManager().findFragmentById(
 					R.id.item_list)).setActivateOnItemClick(true);
 		}
+		
+		Toast.makeText(this, "Hello!", Toast.LENGTH_LONG).show();
+		
+        //Bluetooth接続できるかどうかチェックする
+    	//接続できなければ、アプリを終了
+		if (mMeg == null)
+		{
+        	try {
+        		// MEGはシングルトンパターン
+        		// 最初のgetInstance呼び出しではインスタンス生成時に例外が投げられることがある
+    			mMeg = Meg.getInstance();
+        		// MEGのイベント監視のハンドラを登録
+            	mMeg.registerMegListener(this);
 
-		// TODO: If exposing deep links into your app, handle intents here.
+                // MEGのグラフィックス機能を使うクラスの生成
+                mMegGraphics = new MegGraphics(mMeg);
+    		} catch (BluetoothNotFoundException e) {
+    			Toast.makeText(this, "Bluetoothアダプターが見つかりません", Toast.LENGTH_LONG).show();
+    			finish();
+    		} catch (BluetoothNotEnabledException e) {
+    			Toast.makeText(this, "Bluetoothが無効になっています\n有効にしてください", Toast.LENGTH_LONG).show();
+    			finish();
+    		}
+		}
+		// mMegは非null
+		if (mMeg.isConnected())
+		{
+			// 接続済み
+			Toast.makeText(this, "CONNECTED!", Toast.LENGTH_LONG).show();
+		}
+		else // 未接続
+		{
+            //Bluetooth接続できるペアリング済みデバイスのリストを表示するアクティビティ（ダイアログ）を開始する。
+        	//アクティビティが終了したら、onActivityResult() に終了コードとして、REQUEST_CONNECT_DEVICEを返す。
+            //MEGへの接続はonActivityResult()で実行される。
+			// addressは"XX:XX:XX:XX:XX:XX"の形式
+			BluetoothAdapter mBtAdapter = BluetoothAdapter.getDefaultAdapter();
+
+	        // Get a set of currently paired devices
+	        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
+	        for (BluetoothDevice btd : pairedDevices) {
+	        	if (btd.getName().equals("MEG4")) {
+	    			Toast.makeText(this, "connect to " + btd.getAddress(), Toast.LENGTH_LONG).show();
+	    			mMeg.connect(btd.getAddress());
+	        	}
+	        }
+		}
+		
+		
 	}
 
 	/**
@@ -73,5 +135,83 @@ public class ItemListActivity extends FragmentActivity implements
 			detailIntent.putExtra(ItemDetailFragment.ARG_ITEM_ID, id);
 			startActivity(detailIntent);
 		}
+	}
+
+	@Override
+	public void onMegAccelChanged(int arg0, int arg1, int arg2) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegConnected() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegConnectionFailed() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegDeleteImage(int arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegDirectionChanged(int arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegDisconnected() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegGraphicsCommandEnd(int arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegGraphicsCommandStart(int arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegKeyPush(int arg0, int arg1) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegSetContext(int arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegSleep() {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegStatusChanged(MegStatus arg0) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onMegVoltageLow() {
+		// TODO Auto-generated method stub
+		
 	}
 }
