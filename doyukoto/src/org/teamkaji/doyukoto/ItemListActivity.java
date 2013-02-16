@@ -1,5 +1,6 @@
 package org.teamkaji.doyukoto;
 
+import java.io.File;
 import java.io.InputStream;
 import java.util.Set;
 
@@ -14,6 +15,7 @@ import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
@@ -149,12 +151,12 @@ public class ItemListActivity extends FragmentActivity implements
 		// 画像
 		try
 		{
-			InputStream is = getResources().getAssets().open("zozo.jpg");
+			InputStream is = getResources().getAssets().open("bakusoku_title.png");
 			Bitmap bm = BitmapFactory.decodeStream(is);
 			
     		mMegGraphics.begin();
-    		mMegGraphics.registerImage(1000, bm); // ID=1000に登録
-    		mMegGraphics.drawImage(1000, 0, 0, new Rect(10, 30, 330, 270)); // 画像の(10, 30)-(330, 270)のQVGAサイズを切り出して描画
+    		mMegGraphics.registerImage(1000, resize(bm, 320, 240)); // ID=1000に登録
+    		mMegGraphics.drawImage(1000, 0, 0, new Rect(0, 0, 320, 240)); // 画像の(10, 30)-(330, 270)のQVGAサイズを切り出して描画
     		mMegGraphics.end();
 		}
 		catch (Exception e)
@@ -162,7 +164,24 @@ public class ItemListActivity extends FragmentActivity implements
 			Toast.makeText(this, "open asset failed", Toast.LENGTH_SHORT).show();
 		}
 	}
+	
+	/**
+	 * サイズ変換
+	 * @param resizeWidth リサイズ後の幅
+	 * @param resizeHeight リサイズ後の高さ
+	 */
+	public Bitmap resize(Bitmap bitmap, float resizeWidth, float resizeHeight){
+		float resizeScaleWidth;
+		float resizeScaleHeight;
 
+		Matrix matrix = new Matrix();        
+		resizeScaleWidth = resizeWidth / bitmap.getWidth();
+		resizeScaleHeight = resizeHeight / bitmap.getHeight();
+		matrix.postScale(resizeScaleWidth, resizeScaleHeight);
+		return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+	}
+
+	
 	@Override
 	public void onMegConnectionFailed() {
 		// TODO Auto-generated method stub
