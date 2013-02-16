@@ -19,7 +19,7 @@ public class ImageSearcher {
         StringBuilder builder = new StringBuilder();
         try {
             URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?" +
-                    "v=1.0&rsz=1&hl=ja&lr=lang_ja&gl=jp&q=" + URLEncoder.encode(searchKey, "UTF-8"));
+                    "v=1.0&safe=off&rsz=1&hl=ja&lr=lang_ja&gl=jp&q=" + URLEncoder.encode(searchKey, "UTF-8"));
             
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Referer", "http://www.yahoo.co.jp/");

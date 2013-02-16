@@ -1,8 +1,8 @@
 package org.teamkaji.doyukoto;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.Set;
 
 import jp.co.olympus.meg40.BluetoothNotEnabledException;
@@ -11,11 +11,9 @@ import jp.co.olympus.meg40.Meg;
 import jp.co.olympus.meg40.MegGraphics;
 import jp.co.olympus.meg40.MegListener;
 import jp.co.olympus.meg40.MegStatus;
-
-import org.codehaus.jackson.JsonParseException;
-
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -23,8 +21,8 @@ import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.speech.RecognizerIntent;
 import android.support.v4.app.FragmentActivity;
-import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -53,6 +51,9 @@ public class ItemListActivity extends FragmentActivity implements
 	
 	private Meg mMeg; //MEGへのコマンド送信を行うインスタンス
 	private MegGraphics mMegGraphics; // グラフィック描画用
+	
+	private static final int VOICE_REQUEST_CODE = 123;
+
 
 
 	@Override
@@ -160,8 +161,46 @@ public class ItemListActivity extends FragmentActivity implements
 		mMegGraphics.drawString(100, 50, new String(" ")); // (100, 50)の位置に描画
 		mMegGraphics.end();
 		
-		showImage("AV女優");
+		voiceSearch();
 	}
+	
+	private void voiceSearch() {
+        try {
+            // インテント作成
+            Intent intent = new Intent(
+                    RecognizerIntent.ACTION_RECOGNIZE_SPEECH); // ACTION_WEB_SEARCH
+            intent.putExtra(
+                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+            intent.putExtra(
+                    RecognizerIntent.EXTRA_PROMPT,
+                    "VoiceRecognitionTest"); // お好きな文字に変更できます
+            
+            // インテント発行
+            startActivityForResult(intent, VOICE_REQUEST_CODE);
+        } catch (ActivityNotFoundException e) {
+            // このインテントに応答できるアクティビティがインストールされていない場合
+            Toast.makeText(this,
+                "ActivityNotFoundException", Toast.LENGTH_LONG).show();
+        }
+	}
+	
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // 自分が投げたインテントであれば応答する
+        if (requestCode == VOICE_REQUEST_CODE && resultCode == RESULT_OK) {
+            
+            // 結果文字列リスト
+            ArrayList<String> results = data.getStringArrayListExtra(
+                    RecognizerIntent.EXTRA_RESULTS);
+            
+            // トーストを使って結果を表示
+            showImage(results.get(0));
+            Toast.makeText(this, results.get(0), Toast.LENGTH_LONG).show();
+        }
+        
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 	
 	private void showImage(String query) {
 		try
