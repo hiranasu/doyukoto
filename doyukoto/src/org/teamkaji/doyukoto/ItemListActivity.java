@@ -2,6 +2,7 @@ package org.teamkaji.doyukoto;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URL;
 import java.util.Set;
 
 import jp.co.olympus.meg40.BluetoothNotEnabledException;
@@ -110,19 +111,7 @@ public class ItemListActivity extends FragmentActivity implements
 	        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
 	        for (BluetoothDevice btd : pairedDevices) {
 	        	if (btd.getName().equals("MEG4")) {
-//	    			Toast.makeText(this, "connect to " + btd.getAddress(), Toast.LENGTH_LONG).show();
-	    			
-	        	    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
-	    	        ImageSearcher imageSercher = new ImageSearcher();
-	    	        try {
-	    	            Toast.makeText(this, imageSercher.getImageUrl(), Toast.LENGTH_LONG).show();
-	    	        } catch (JsonParseException e1) {
-	    	            // TODO Auto-generated catch block
-	    	            e1.printStackTrace();
-	    	        } catch (IOException e1) {
-	    	            // TODO Auto-generated catch block
-	    	            e1.printStackTrace();
-	    	        }
+	    			Toast.makeText(this, "connect to " + btd.getAddress(), Toast.LENGTH_LONG).show();
 	    			
 	    			mMeg.connect(btd.getAddress());
 	    			break;
@@ -169,7 +158,11 @@ public class ItemListActivity extends FragmentActivity implements
 		// 画像
 		try
 		{
-			InputStream is = getResources().getAssets().open("bakusoku_title.png");
+            StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
+            ImageSearcher imageSercher = new ImageSearcher();
+            URL url = new URL(imageSercher.getImageUrl("adult%20porno"));
+            InputStream is = url.openStream();
+//			InputStream is = getResources().getAssets().open("bakusoku_title.png");
 			Bitmap bm = BitmapFactory.decodeStream(is);
 			
     		mMegGraphics.begin();
