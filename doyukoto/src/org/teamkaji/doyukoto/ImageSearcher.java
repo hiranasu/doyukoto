@@ -14,11 +14,12 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 public class ImageSearcher {
 
-    public String getImageUrl() throws JsonParseException, IOException {
+    public String getImageUrl(String searchKey) throws JsonParseException, IOException {
         StringBuilder builder = new StringBuilder();
         try {
             URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?" +
-                    "v=1.0&q=barack%20obama&userip=INSERT-USER-IP");
+                    "v=1.0&q=" + searchKey + "&userip=INSERT-USER-IP");
+            
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Referer", "http://www.yahoo.co.jp/");
             
@@ -43,10 +44,5 @@ public class ImageSearcher {
         }
         
         return results.get(0).get("url");
-    }
-    
-    public static void main(String[] args) throws JsonParseException, IOException {
-        ImageSearcher imageSercher = new ImageSearcher();
-        System.out.println(imageSercher.getImageUrl());
     }
 }
