@@ -1,5 +1,6 @@
 package org.teamkaji.doyukoto;
 
+import java.io.InputStream;
 import java.util.Set;
 
 import jp.co.olympus.meg40.BluetoothNotEnabledException;
@@ -11,6 +12,9 @@ import jp.co.olympus.meg40.MegStatus;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
@@ -61,8 +65,6 @@ public class ItemListActivity extends FragmentActivity implements
 					R.id.item_list)).setActivateOnItemClick(true);
 		}
 		
-		Toast.makeText(this, "Hello!", Toast.LENGTH_LONG).show();
-		
         //Bluetooth接続できるかどうかチェックする
     	//接続できなければ、アプリを終了
 		if (mMeg == null)
@@ -107,8 +109,6 @@ public class ItemListActivity extends FragmentActivity implements
 	        	}
 	        }
 		}
-		
-		
 	}
 
 	/**
@@ -145,8 +145,22 @@ public class ItemListActivity extends FragmentActivity implements
 
 	@Override
 	public void onMegConnected() {
-		// TODO Auto-generated method stub
-		
+		Toast.makeText(this, "onMegConnected", Toast.LENGTH_SHORT).show();
+		// 画像
+		try
+		{
+			InputStream is = getResources().getAssets().open("zozo.jpg");
+			Bitmap bm = BitmapFactory.decodeStream(is);
+			
+    		mMegGraphics.begin();
+    		mMegGraphics.registerImage(1000, bm); // ID=1000に登録
+    		mMegGraphics.drawImage(1000, 0, 0, new Rect(10, 30, 330, 270)); // 画像の(10, 30)-(330, 270)のQVGAサイズを切り出して描画
+    		mMegGraphics.end();
+		}
+		catch (Exception e)
+		{
+			Toast.makeText(this, "open asset failed", Toast.LENGTH_SHORT).show();
+		}
 	}
 
 	@Override
