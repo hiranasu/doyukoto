@@ -108,6 +108,7 @@ public class ItemListActivity extends FragmentActivity implements
 	        	if (btd.getName().equals("MEG4")) {
 	    			Toast.makeText(this, "connect to " + btd.getAddress(), Toast.LENGTH_LONG).show();
 	    			mMeg.connect(btd.getAddress());
+	    			break;
 	        	}
 	        }
 		}
