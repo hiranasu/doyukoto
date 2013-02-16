@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -155,16 +156,23 @@ public class ItemListActivity extends FragmentActivity implements
 	@Override
 	public void onMegConnected() {
 		Toast.makeText(this, "onMegConnected", Toast.LENGTH_SHORT).show();
-		// 画像
+		mMegGraphics.begin();
+		mMegGraphics.drawString(100, 50, new String(" ")); // (100, 50)の位置に描画
+		mMegGraphics.end();
+		
+		showImage("AV女優");
+	}
+	
+	private void showImage(String query) {
 		try
 		{
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
             ImageSearcher imageSercher = new ImageSearcher();
-            URL url = new URL(imageSercher.getImageUrl("adult%20porno"));
+            URL url = new URL(imageSercher.getImageUrl(query));
             InputStream is = url.openStream();
 //			InputStream is = getResources().getAssets().open("bakusoku_title.png");
 			Bitmap bm = BitmapFactory.decodeStream(is);
-			
+
     		mMegGraphics.begin();
     		mMegGraphics.registerImage(1000, resize(bm, 320, 240)); // ID=1000に登録
     		mMegGraphics.drawImage(1000, 0, 0, new Rect(0, 0, 320, 240)); // 画像の(10, 30)-(330, 270)のQVGAサイズを切り出して描画
@@ -185,7 +193,7 @@ public class ItemListActivity extends FragmentActivity implements
 		float resizeScaleWidth;
 		float resizeScaleHeight;
 
-		Matrix matrix = new Matrix();        
+		Matrix matrix = new Matrix();
 		resizeScaleWidth = resizeWidth / bitmap.getWidth();
 		resizeScaleHeight = resizeHeight / bitmap.getHeight();
 		matrix.postScale(resizeScaleWidth, resizeScaleHeight);

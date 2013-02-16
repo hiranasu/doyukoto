@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
+import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -18,7 +19,7 @@ public class ImageSearcher {
         StringBuilder builder = new StringBuilder();
         try {
             URL url = new URL("https://ajax.googleapis.com/ajax/services/search/images?" +
-                    "v=1.0&q=" + searchKey + "&userip=INSERT-USER-IP");
+                    "v=1.0&rsz=1&hl=ja&lr=lang_ja&gl=jp&q=" + URLEncoder.encode(searchKey, "UTF-8"));
             
             URLConnection connection = url.openConnection();
             connection.addRequestProperty("Referer", "http://www.yahoo.co.jp/");
