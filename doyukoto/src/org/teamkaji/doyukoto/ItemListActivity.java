@@ -1,6 +1,6 @@
 package org.teamkaji.doyukoto;
 
-import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.Set;
 
@@ -10,6 +10,9 @@ import jp.co.olympus.meg40.Meg;
 import jp.co.olympus.meg40.MegGraphics;
 import jp.co.olympus.meg40.MegListener;
 import jp.co.olympus.meg40.MegStatus;
+
+import org.codehaus.jackson.JsonParseException;
+
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.Intent;
@@ -18,6 +21,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.support.v4.app.FragmentActivity;
 import android.widget.Toast;
 
@@ -106,7 +110,20 @@ public class ItemListActivity extends FragmentActivity implements
 	        Set<BluetoothDevice> pairedDevices = mBtAdapter.getBondedDevices();
 	        for (BluetoothDevice btd : pairedDevices) {
 	        	if (btd.getName().equals("MEG4")) {
-	    			Toast.makeText(this, "connect to " + btd.getAddress(), Toast.LENGTH_LONG).show();
+//	    			Toast.makeText(this, "connect to " + btd.getAddress(), Toast.LENGTH_LONG).show();
+	    			
+	        	    StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
+	    	        ImageSearcher imageSercher = new ImageSearcher();
+	    	        try {
+	    	            Toast.makeText(this, imageSercher.getImageUrl(), Toast.LENGTH_LONG).show();
+	    	        } catch (JsonParseException e1) {
+	    	            // TODO Auto-generated catch block
+	    	            e1.printStackTrace();
+	    	        } catch (IOException e1) {
+	    	            // TODO Auto-generated catch block
+	    	            e1.printStackTrace();
+	    	        }
+	    			
 	    			mMeg.connect(btd.getAddress());
 	    			break;
 	        	}
