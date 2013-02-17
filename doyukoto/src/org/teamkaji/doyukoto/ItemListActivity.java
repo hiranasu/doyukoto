@@ -261,10 +261,10 @@ public class ItemListActivity extends FragmentActivity implements
 		try
 		{
 			mMegGraphics.begin();
-    		mMegGraphics.drawImage(accountIconMap.get(account), 10, locationLevel * 120 + 10, new Rect(0, 0, 48, 48));
+    		mMegGraphics.drawImage(accountIconMap.get(account), 10, (locationLevel - 1) * 120 + 10, new Rect(0, 0, 48, 48));
     		mMegGraphics.setFontColor(0xff0000ff);
     		mMegGraphics.setFontSize(35);
-    		mMegGraphics.drawString(10 , locationLevel * 120 + 60, new String(text));
+    		mMegGraphics.drawString(10 , (locationLevel - 1) * 120 + 60, new String(text));
     		mMegGraphics.end();
     		Log.v("view", account + ":" + text);
 		}
