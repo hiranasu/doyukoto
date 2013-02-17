@@ -3,6 +3,8 @@ package org.teamkaji.doyukoto;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 import java.util.Set;
 
 import jp.co.olympus.meg40.BluetoothNotEnabledException;
@@ -23,6 +25,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.speech.RecognizerIntent;
 import android.support.v4.app.FragmentActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 /**
@@ -161,58 +164,177 @@ public class ItemListActivity extends FragmentActivity implements
 		mMegGraphics.drawString(100, 50, new String(" ")); // (100, 50)の位置に描画
 		mMegGraphics.end();
 		
-		voiceSearch();
+		viewEndless();
+//		voiceSearch();
 	}
 	
-	private void voiceSearch() {
-        try {
-            // インテント作成
-            Intent intent = new Intent(
-                    RecognizerIntent.ACTION_RECOGNIZE_SPEECH); // ACTION_WEB_SEARCH
-            intent.putExtra(
-                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
-                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-            intent.putExtra(
-                    RecognizerIntent.EXTRA_PROMPT,
-                    "VoiceRecognitionTest"); // お好きな文字に変更できます
-            
-            // インテント発行
-            startActivityForResult(intent, VOICE_REQUEST_CODE);
-        } catch (ActivityNotFoundException e) {
-            // このインテントに応答できるアクティビティがインストールされていない場合
-            Toast.makeText(this,
-                "ActivityNotFoundException", Toast.LENGTH_LONG).show();
-        }
+	private long lastId = 0;
+
+	private void viewEndless() {
+        StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
+
+        TalkSearcher ts = new TalkSearcher();
+		for (int i = 0; i < 100; i++) {  // 暫定的に回数指定
+			List<Talk> talks = ts.getTalks(lastId);
+			Log.v("", "getTalks!");
+			int processedTalkNum = 0;
+			List<String> urls = new ArrayList<String>();
+			if (talks != null ) {
+				for (Talk t : talks) {
+					
+					// 文字を画面に流す
+					Log.v("", t.getText());
+//					textToMeg(t.getAccount(), t.getText(), processedTalkNum);
+					textToMegWithIcon(t.getAccount(), t.getText(), processedTalkNum);
+					
+					if (t.getUrl() != null) {
+						urls.add(t.getUrl());
+					}
+
+					// MAXのIDを保存
+					if (t.getId() > lastId) {
+						lastId = t.getId();
+					}
+					
+					processedTalkNum++;
+					if(processedTalkNum == talks.size()) {
+						try {
+							Thread.sleep(2000);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
+						// どれか画像を表示
+						if (urls.size() > 0) {
+							showImage(urls.get(r.nextInt(urls.size())));
+						}
+					}
+				}
+			}
+
+			try {
+				// 一定間隔ごとに実行
+				Thread.sleep(5000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+				break;
+			}
+		}
+	}
+
+	private void textToMegWithIcon(String account, String text, int scrollIndex) {
+		try
+		{
+    		InputStream is = getResources().getAssets().open(account + ".png");
+			Bitmap bm = BitmapFactory.decodeStream(is);
+		
+    		mMegGraphics.begin();
+    		mMegGraphics.clearScreen();
+    		mMegGraphics.registerImage(1003, resize(bm, 48, 48));
+    		mMegGraphics.drawImage(1003, 20, 20, new Rect(0, 0, 48, 48));
+    		mMegGraphics.setFontColor(0xffffffff);
+    		mMegGraphics.drawString(20, 80, new String(text));
+    		mMegGraphics.end();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+			Toast.makeText(this, "open asset failed", Toast.LENGTH_SHORT).show();
+		}
 	}
 	
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // 自分が投げたインテントであれば応答する
-        if (requestCode == VOICE_REQUEST_CODE && resultCode == RESULT_OK) {
-            
-            // 結果文字列リスト
-            ArrayList<String> results = data.getStringArrayListExtra(
-                    RecognizerIntent.EXTRA_RESULTS);
-            
-            // トーストを使って結果を表示
-            showImage(results.get(0));
-            Toast.makeText(this, results.get(0), Toast.LENGTH_LONG).show();
-        }
-        
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+	private Random r = new Random(0);
+//	
+//	private void textToMeg(String account, String str, int scrollIndex) {
+//		//色定義
+//		final int RED 		= 0xffff0000;
+//		final int GREEN 	= 0xff00ff00;
+//		final int BLUE 		= 0xff0000ff;
+//		final int YELLOW 	= 0xffffff00;
+//		final int MAGENTA 	= 0xffff00ff;
+//		final int CYAN 		= 0xff00ffff;
+//		final int GRAY      = 0xffcccccc;
+//
+//		//移動量（ピクセル）
+//		final int SPEED_FAST = 10;
+//
+//		mMegGraphics.begin();
+//		
+//		int[] size 	= { 30 + r.nextInt(30) };
+//		int[] colors0 	= { RED, GREEN, BLUE, YELLOW, MAGENTA, CYAN, GRAY};
+//		int[] color = {colors0[Math.abs(account.hashCode()) % colors0.length]};
+//		String[] texts0 = {str};
+//		final int startX0 = 320;
+//		final int startY0 = r.nextInt(4) * 40;
+//		
+//		//文字列登録
+//		mMegGraphics.registerText(scrollIndex, true, size, color, texts0);
+//		//スクロール設定、スクロール開始
+//		mMegGraphics.registerScroll(scrollIndex, startX0, startY0, SPEED_FAST, 1500, 0, 5);
+//		mMegGraphics.end();
+//	}
+//	
+//	private void stopTexts() {
+//		int[] textIDs = { 0xffff, }; // 0xffffで全削除
+//		
+//		mMegGraphics.begin();
+//		mMegGraphics.scrollStartStop(1);
+//		mMegGraphics.removeText(textIDs); // 登録したテキストを全削除、registerScrollで登録したものも削除される
+////		mMegGraphics.end();
+//	}
+	
+//	private void voiceSearch() {
+//        try {
+//            // インテント作成
+//            Intent intent = new Intent(
+//                    RecognizerIntent.ACTION_RECOGNIZE_SPEECH); // ACTION_WEB_SEARCH
+//            intent.putExtra(
+//                    RecognizerIntent.EXTRA_LANGUAGE_MODEL,
+//                    RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+//            intent.putExtra(
+//                    RecognizerIntent.EXTRA_PROMPT,
+//                    "VoiceRecognitionTest"); // お好きな文字に変更できます
+//            
+//            // インテント発行
+//            startActivityForResult(intent, VOICE_REQUEST_CODE);
+//        } catch (ActivityNotFoundException e) {
+//            // このインテントに応答できるアクティビティがインストールされていない場合
+//            Toast.makeText(this,
+//                "ActivityNotFoundException", Toast.LENGTH_LONG).show();
+//        }
+//	}
+//	
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        // 自分が投げたインテントであれば応答する
+//        if (requestCode == VOICE_REQUEST_CODE && resultCode == RESULT_OK) {
+//            
+//            // 結果文字列リスト
+//            ArrayList<String> results = data.getStringArrayListExtra(
+//                    RecognizerIntent.EXTRA_RESULTS);
+//            
+//            // トーストを使って結果を表示
+//            showImage(results.get(0));
+//            Toast.makeText(this, results.get(0), Toast.LENGTH_LONG).show();
+//        }
+//        
+//        super.onActivityResult(requestCode, resultCode, data);
+//    }
 	
 	private void showImage(String query) {
+		// 流れている文字を停止
+//		stopTexts();
+		mMegGraphics.begin();
 		try
 		{
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
-            ImageSearcher imageSercher = new ImageSearcher();
-            URL url = new URL(imageSercher.getImageUrl(query));
+//            ImageSearcher imageSercher = new ImageSearcher();
+//            URL url = new URL(imageSercher.getImageUrl(query));
+            URL url = new URL(query);
             InputStream is = url.openStream();
 //			InputStream is = getResources().getAssets().open("bakusoku_title.png");
 			Bitmap bm = BitmapFactory.decodeStream(is);
 
-    		mMegGraphics.begin();
+//    		mMegGraphics.begin();
     		mMegGraphics.registerImage(1000, resize(bm, 320, 240)); // ID=1000に登録
     		mMegGraphics.drawImage(1000, 0, 0, new Rect(0, 0, 320, 240)); // 画像の(10, 30)-(330, 270)のQVGAサイズを切り出して描画
     		mMegGraphics.end();
