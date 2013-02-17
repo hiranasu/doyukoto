@@ -19,7 +19,7 @@ public class TalkSearcher {
     public List<Talk> getTalks(long lastId) {
         StringBuilder builder = new StringBuilder();
         try {
-            URL url = new URL("http://210.129.194.74/getTalk.php?lastid=" + lastId + "&limit=4");
+            URL url = new URL("http://210.129.194.74/getTalk.php?lastid=" + lastId + "&limit=2");
             
             URLConnection connection = url.openConnection();
             

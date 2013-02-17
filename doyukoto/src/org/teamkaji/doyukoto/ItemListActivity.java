@@ -1,8 +1,10 @@
 package org.teamkaji.doyukoto;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -164,6 +166,9 @@ public class ItemListActivity extends FragmentActivity implements
 		mMegGraphics.drawString(100, 50, new String(" ")); // (100, 50)の位置に描画
 		mMegGraphics.end();
 		
+		// アイコンを事前登録
+		settingAccountPngs();
+		
 		viewEndless();
 //		voiceSearch();
 	}
@@ -181,20 +186,25 @@ public class ItemListActivity extends FragmentActivity implements
 			List<String> urls = new ArrayList<String>();
 			if (talks != null) {
 				for (Talk t : talks) {
-					
 					// 文字を画面に流す
 					Log.v("", t.getText());
 //					textToMeg(t.getAccount(), t.getText(), processedTalkNum);
-					textToMegWithIcon(t.getAccount(), t.getText(), processedTalkNum);
+					textToMegWithIcon(t.getAccount(), t.getText(), processedTalkNum++, processedTalkNum);
 					
 					if (t.getUrl() != null) {
 						urls.add(t.getUrl());
 					}
-
+					
 					// MAXのIDを保存
 					if (t.getId() > lastId) {
 						lastId = t.getId();
 					}
+				}
+				try {
+					// 2秒間表示
+					Thread.sleep(2000);
+				} catch (InterruptedException e) {
+					e.printStackTrace();
 				}
 			}
 
@@ -202,40 +212,78 @@ public class ItemListActivity extends FragmentActivity implements
 				showImage(urls.get(r.nextInt(urls.size())));
 			}
 			try {
-				// 5秒間ごとに取得
-				Thread.sleep(5000);
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	private void textToMegWithIcon(String account, String text, int scrollIndex) {
-		try
-		{
-    		InputStream is = getResources().getAssets().open(account + ".png");
-			Bitmap bm = BitmapFactory.decodeStream(is);
-		
-    		mMegGraphics.begin();
-    		mMegGraphics.clearScreen();
-    		mMegGraphics.registerImage(1003, resize(bm, 48, 48));
-    		mMegGraphics.drawImage(1003, 20, 20, new Rect(0, 0, 48, 48));
-    		mMegGraphics.setFontColor(0xff0000ff);
-    		mMegGraphics.setFontSize(40);
-    		mMegGraphics.drawString(20, 80, new String(text));
-    		mMegGraphics.end();
-    		Log.v("view", account);
-			try {
-				// 4秒間表示
+				// 4秒間ごとに取得
 				Thread.sleep(4000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private HashMap<String, Integer> accountIconMap;
+	
+	private void settingAccountPngs() {
+		accountIconMap = new HashMap<String, Integer>();
+		try
+		{
+    		mMegGraphics.begin();
+    		settingAccountPng(1101, "tteduka");
+    		settingAccountPng(1102, "ttamari");
+    		settingAccountPng(1103, "mhirakaw");
+    		settingAccountPng(1104, "takando");
+    		settingAccountPng(1105, "gyoshida");
+    		settingAccountPng(1106, "ykashifu");
+    		mMegGraphics.end();
+		}
 		catch (Exception e)
 		{
 			e.printStackTrace();
-			Toast.makeText(this, "open asset failed", Toast.LENGTH_SHORT).show();
+		}
+	}
+	
+	private void settingAccountPng(Integer id, String account) {
+		mMegGraphics.registerImage(id, resize(getBitmap(account + ".png"), 48, 48));
+		accountIconMap.put(account, id);
+	}
+	
+	private Bitmap getBitmap(String bmname) {
+		InputStream is = null;
+		try {
+			is = getResources().getAssets().open(bmname);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		return BitmapFactory.decodeStream(is);
+	}
+
+	private void textToMegWithIcon(String account, String text, int scrollIndex, int locationLevel) {
+		Log.v("locationLevel", Integer.toString(locationLevel));
+		try
+		{
+			mMegGraphics.begin();
+    		mMegGraphics.drawImage(accountIconMap.get(account), 10, locationLevel * 120 + 10, new Rect(0, 0, 48, 48));
+    		mMegGraphics.setFontColor(0xff0000ff);
+    		mMegGraphics.setFontSize(35);
+    		mMegGraphics.drawString(10 , locationLevel * 120 + 60, new String(text));
+    		mMegGraphics.end();
+    		Log.v("view", account + ":" + text);
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
+		}
+	}
+
+	private void clearScreen() {
+		try
+		{
+    		mMegGraphics.begin();
+    		mMegGraphics.clearScreen();
+    		mMegGraphics.end();
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace();
 		}
 	}
 	
@@ -332,6 +380,7 @@ public class ItemListActivity extends FragmentActivity implements
 			Bitmap bm = BitmapFactory.decodeStream(is);
 
 //    		mMegGraphics.begin();
+			mMegGraphics.clearScreen();
     		mMegGraphics.registerImage(1000, resize(bm, 320, 240)); // ID=1000に登録
     		mMegGraphics.drawImage(1000, 0, 0, new Rect(0, 0, 320, 240)); // 画像の(10, 30)-(330, 270)のQVGAサイズを切り出して描画
     		mMegGraphics.end();
