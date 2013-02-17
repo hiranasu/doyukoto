@@ -179,7 +179,7 @@ public class ItemListActivity extends FragmentActivity implements
 			Log.v("", "getTalks!");
 			int processedTalkNum = 0;
 			List<String> urls = new ArrayList<String>();
-			if (talks != null ) {
+			if (talks != null) {
 				for (Talk t : talks) {
 					
 					// 文字を画面に流す
@@ -195,28 +195,17 @@ public class ItemListActivity extends FragmentActivity implements
 					if (t.getId() > lastId) {
 						lastId = t.getId();
 					}
-					
-					processedTalkNum++;
-					if(processedTalkNum == talks.size()) {
-						try {
-							Thread.sleep(2000);
-						} catch (InterruptedException e) {
-							e.printStackTrace();
-						}
-						// どれか画像を表示
-						if (urls.size() > 0) {
-							showImage(urls.get(r.nextInt(urls.size())));
-						}
-					}
 				}
 			}
 
+			if (urls.size() > 0) {
+				showImage(urls.get(r.nextInt(urls.size())));
+			}
 			try {
-				// 一定間隔ごとに実行
+				// 5秒間ごとに取得
 				Thread.sleep(5000);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
-				break;
 			}
 		}
 	}
@@ -231,9 +220,17 @@ public class ItemListActivity extends FragmentActivity implements
     		mMegGraphics.clearScreen();
     		mMegGraphics.registerImage(1003, resize(bm, 48, 48));
     		mMegGraphics.drawImage(1003, 20, 20, new Rect(0, 0, 48, 48));
-    		mMegGraphics.setFontColor(0xffffffff);
+    		mMegGraphics.setFontColor(0xff0000ff);
+    		mMegGraphics.setFontSize(40);
     		mMegGraphics.drawString(20, 80, new String(text));
     		mMegGraphics.end();
+    		Log.v("view", account);
+			try {
+				// 4秒間表示
+				Thread.sleep(4000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 		catch (Exception e)
 		{
@@ -338,6 +335,7 @@ public class ItemListActivity extends FragmentActivity implements
     		mMegGraphics.registerImage(1000, resize(bm, 320, 240)); // ID=1000に登録
     		mMegGraphics.drawImage(1000, 0, 0, new Rect(0, 0, 320, 240)); // 画像の(10, 30)-(330, 270)のQVGAサイズを切り出して描画
     		mMegGraphics.end();
+    		Log.v("view", "image!");
 		}
 		catch (Exception e)
 		{
